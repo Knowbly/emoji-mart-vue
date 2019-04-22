@@ -8,6 +8,7 @@
       :color="color"
       :categories="filteredCategories"
       :active-category="activeCategory"
+      :customSVGs="customSVGs"
       @click="onAnchorClick"
     />
   </div>
@@ -271,7 +272,7 @@ export default {
       this.searchEmojis = emojis
     },
     onEmojiEnter(emoji) {
-      if (emoji.custom) {
+      if (emoji && emoji.custom) {
         // Use Array.prototype.find() when it is more widely supported.
         const customEmoji = this.customEmojis.filter(_emoji => _emoji.id === emoji.id)[0]
         emoji = Object.assign({}, emoji, customEmoji)

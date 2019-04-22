@@ -8,7 +8,8 @@
     :style="{ 'color': (category.id == activeCategory.id ? color : '') }"
     :title="i18n.categories[category.id]"
     @click="$emit('click', category)">
-    <div v-html="svgs[category.id]"/>
+    <div v-if="customSVGs && customSVGs[category.id]" v-html="customSVGs[category.id]"/>
+    <div v-else v-html="svgs[category.id]"/>
     <span class="emoji-mart-anchor-bar" :style="{ backgroundColor: color }"></span>
   </span>
 </div>
@@ -37,6 +38,11 @@ export default {
       default() {
         return {}
       }
+    },
+    customSVGs: {
+      type: Object,
+      required: false,
+      default: undefined
     }
   },
   created() {

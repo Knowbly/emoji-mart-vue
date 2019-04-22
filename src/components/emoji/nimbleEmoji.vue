@@ -32,6 +32,9 @@ export default {
   },
   computed: {
     emojiData() {
+      if (!this.emoji) {
+        return {}
+      }
       return getData(this.emoji, this.skin, this.set, this.mutableData)
     },
     sanitizedData() {

@@ -143,6 +143,11 @@ const PickerProps = {
     default() {
       return {}
     }
+  },
+  customSVGs: {
+    type: Object,
+    required: false,
+    default: undefined
   }
 }
 
