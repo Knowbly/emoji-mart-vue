@@ -60,6 +60,7 @@
       :show-skin-tones="showSkinTones"
       :emoji-props="emojiProps"
       :skin-props="skinProps"
+      :showPreviewName="showPreviewName"
       @change="onSkinChange"
     />
   </div>
@@ -217,6 +218,11 @@ export default {
     this.activeCategory = this.filteredCategories[0]
   },
   methods: {
+    clearSearch() {
+      if (this.$refs && this.$refs.search) {
+        this.$refs.search.clear()
+      }
+    },
     onScroll() {
       if (this.infiniteScroll && !this.waitingForPaint) {
         this.waitingForPaint = true
