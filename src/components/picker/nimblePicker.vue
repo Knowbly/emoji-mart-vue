@@ -218,10 +218,11 @@ export default {
     this.activeCategory = this.filteredCategories[0]
   },
   methods: {
-    clearSearch() {
+    reset() {
       if (this.$refs && this.$refs.search) {
         this.$refs.search.clear()
       }
+      this.activeCategory = this.filteredCategories[0]
     },
     onScroll() {
       if (this.infiniteScroll && !this.waitingForPaint) {
