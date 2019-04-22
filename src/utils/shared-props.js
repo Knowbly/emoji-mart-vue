@@ -148,6 +148,10 @@ const PickerProps = {
     type: Object,
     required: false,
     default: undefined
+  },
+  showPreviewName: {
+    type: Boolean,
+    default: true
   }
 }
 

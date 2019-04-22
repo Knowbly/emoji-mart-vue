@@ -17,7 +17,7 @@
     </div>
 
     <div class="emoji-mart-preview-data">
-      <div class="emoji-mart-preview-name">{{ emoji.name }}</div>
+      <div v-if="showPreviewName" class="emoji-mart-preview-name">{{ emoji.name }}</div>
       <div class="emoji-mart-preview-shortnames">
         <span v-for="shortName in emojiShortNames" :key="shortName" class="emoji-mart-preview-shortname">:{{ shortName }}:</span>
       </div>
@@ -88,7 +88,11 @@ export default {
     skinProps: {
       type: Object,
       required: true
-    }
+    },
+    showPreviewName: {
+      type: Boolean,
+      default: true
+    },
   },
   computed: {
     emojiData() {
