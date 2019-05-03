@@ -13,6 +13,14 @@ function unifiedToNative(unified) {
   return stringFromCodePoint.apply(null, codePoints)
 }
 
+function getBgPosition({sheet_x, sheet_y}, sheetColumns) {
+  let multiply = 100 / (sheetColumns - 1),
+      x = multiply * sheet_x,
+      y = multiply * sheet_y
+
+  return `${x}% ${y}%`
+}
+
 function sanitize(emoji) {
   var {
       name,
@@ -121,7 +129,6 @@ function getData(_emoji, skin, set, data) {
     if (!variationData.variations && emojiData.variations) {
       delete emojiData.variations
     }
-
     if (
       set == 'native' ||
       variationData[`has_img_${set}`] == undefined ||
@@ -207,4 +214,5 @@ export {
   deepMerge,
   unifiedToNative,
   measureScrollbar,
+  getBgPosition,
 }

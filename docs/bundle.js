@@ -740,29 +740,28 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_nimbleEmoji_vue__ = __webpack_require__(49);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_nimbleEmoji_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_nimbleEmoji_vue__);
 /* harmony namespace reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_nimbleEmoji_vue__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_nimbleEmoji_vue__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_7f853594_hasScoped_true_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_nimbleEmoji_vue__ = __webpack_require__(129);
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(94)
+  __webpack_require__(165)
 }
 var normalizeComponent = __webpack_require__(2)
 /* script */
 
 
 /* template */
-
+var __vue_template__ = null
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
 var __vue_styles__ = injectStyle
 /* scopeId */
-var __vue_scopeId__ = "data-v-7f853594"
+var __vue_scopeId__ = null
 /* moduleIdentifier (server only) */
 var __vue_module_identifier__ = null
 var Component = normalizeComponent(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_nimbleEmoji_vue___default.a,
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_7f853594_hasScoped_true_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_nimbleEmoji_vue__["a" /* default */],
+  __vue_template__,
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
@@ -825,7 +824,7 @@ exports.default = _Object.assign || function (target) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.measureScrollbar = exports.unifiedToNative = exports.deepMerge = exports.intersect = exports.uniq = exports.getSanitizedData = exports.getData = undefined;
+exports.getBgPosition = exports.measureScrollbar = exports.unifiedToNative = exports.deepMerge = exports.intersect = exports.uniq = exports.getSanitizedData = exports.getData = undefined;
 
 var _typeof2 = __webpack_require__(96);
 
@@ -859,6 +858,17 @@ function unifiedToNative(unified) {
   });
 
   return _stringFromCodePoint2.default.apply(null, codePoints);
+}
+
+function getBgPosition(_ref, sheetColumns) {
+  var sheet_x = _ref.sheet_x;
+  var sheet_y = _ref.sheet_y;
+
+  var multiply = 100 / (sheetColumns - 1),
+      x = multiply * sheet_x,
+      y = multiply * sheet_y;
+
+  return x + '% ' + y + '%';
 }
 
 function sanitize(emoji) {
@@ -967,7 +977,6 @@ function getData(_emoji, skin, set, data) {
     if (!variationData.variations && emojiData.variations) {
       delete emojiData.variations;
     }
-
     if (set == 'native' || variationData['has_img_' + set] == undefined || variationData['has_img_' + set]) {
       emojiData.skin_tone = skin;
 
@@ -1050,6 +1059,7 @@ exports.intersect = intersect;
 exports.deepMerge = deepMerge;
 exports.unifiedToNative = unifiedToNative;
 exports.measureScrollbar = measureScrollbar;
+exports.getBgPosition = getBgPosition;
 
 /***/ }),
 /* 21 */
@@ -1245,11 +1255,6 @@ var EmojiProps = {
   emoji: {
     type: [String, Object],
     required: true
-  },
-  customSVGs: {
-    type: Object,
-    required: false,
-    default: undefined
   }
 };
 
@@ -1354,6 +1359,15 @@ var PickerProps = {
     default: function _default() {
       return {};
     }
+  },
+  customSVGs: {
+    type: Object,
+    required: false,
+    default: undefined
+  },
+  showPreviewName: {
+    type: Boolean,
+    default: true
   }
 };
 
@@ -2444,18 +2458,7 @@ var _sharedProps = __webpack_require__(25);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var SHEET_COLUMNS = 52; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
+var SHEET_COLUMNS = 52;
 
 exports.default = {
   props: (0, _extends3.default)({}, _sharedProps.EmojiProps, {
@@ -2464,101 +2467,96 @@ exports.default = {
       required: true
     }
   }),
-  data: function data() {
-    return {
-      mutableData: this.data.compressed ? (0, _data.uncompress)(this.data) : this.data
-    };
-  },
+  functional: true,
+  render: function render(h, ctx) {
+    var data = ctx.data;
+    var props = ctx.props;
+    var listeners = ctx.listeners;
 
-  computed: {
-    emojiData: function emojiData() {
-      return (0, _utils.getData)(this.emoji, this.skin, this.set, this.mutableData);
-    },
-    sanitizedData: function sanitizedData() {
-      return (0, _utils.getSanitizedData)(this.emoji, this.skin, this.set, this.mutableData);
-    },
-    canRender: function canRender() {
-      return this.isCustom || this.isNative || this.hasEmoji || this.fallback;
-    },
-    isNative: function isNative() {
-      return this.native;
-    },
-    isCustom: function isCustom() {
-      if (!this.emojiData) {
-        return false;
-      }
-      return this.emojiData.custom;
-    },
-    hasEmoji: function hasEmoji() {
-      return this.emojiData['has_img_' + this.set];
-    },
-    nativeEmoji: function nativeEmoji() {
-      if (this.emojiData.unified) {
-        return (0, _utils.unifiedToNative)(this.emojiData.unified);
-      } else {
-        return '';
-      }
-    },
-    fallbackEmoji: function fallbackEmoji() {
-      return this.fallback ? this.fallback(this.emoji) : null;
-    },
-    nativeEmojiStyles: function nativeEmojiStyles() {
-      var styles = { fontSize: this.size + 'px' };
 
-      if (this.forceSize) {
-        styles.display = 'inline-block';
-        styles.width = this.size + 'px';
-        styles.height = this.size + 'px';
-      }
+    var emojiData = {};
+    var mutableData = props.data.compressed ? (0, _data.uncompress)(props.data) : props.data;
+    if (props.emoji) {
+      emojiData = (0, _utils.getData)(props.emoji, props.skin, props.set, mutableData);
+    }
+    var hasEmoji = emojiData['has_img_' + props.set];
+    var isNative = props.native;
+    var isCustom = emojiData.custom;
 
-      return styles;
-    },
-    fallbackEmojiStyles: function fallbackEmojiStyles() {
-      if (this.isCustom) {
-        return this.customEmojiStyles;
-      } else if (this.hasEmoji) {
-        return {
-          display: 'inline-block',
-          width: this.size + 'px',
-          height: this.size + 'px',
-          backgroundImage: 'url(' + this.backgroundImageFn(this.set, this.sheetSize) + ')',
-          backgroundSize: 100 * SHEET_COLUMNS + '%',
-          backgroundPosition: this.getPosition()
-        };
-      } else {
-        return null;
-      }
-    },
-    customEmojiStyles: function customEmojiStyles() {
-      return {
+    if (isCustom || isNative || hasEmoji || props.fallback) {
+      var customEmojiStyles = {
         display: 'inline-block',
-        width: this.size + 'px',
-        height: this.size + 'px',
-        backgroundImage: 'url(' + this.emojiData.imageUrl + ')',
+        width: props.size + 'px',
+        height: props.size + 'px',
+        backgroundImage: 'url(' + emojiData.imageUrl + ')',
         backgroundSize: '100%'
       };
-    },
-    title: function title() {
-      return this.tooltip ? this.emojiData.short_names[0] : null;
-    }
-  },
-  methods: {
-    getPosition: function getPosition() {
-      var multiply = 100 / (SHEET_COLUMNS - 1),
-          x = multiply * this.emojiData.sheet_x,
-          y = multiply * this.emojiData.sheet_y;
+      var child = null;
+      if (isCustom) {
+        child = h('span', { attrs: { title: props.title }, style: {
+            display: 'inline-block',
+            width: props.size + 'px',
+            height: props.size + 'px',
+            backgroundImage: 'url(' + emojiData.imageUrl + ')',
+            backgroundSize: '100%'
+          } });
+      } else if (isNative) {
+        var style = { fontSize: props.size + 'px' };
+        if (props.forceSize) {
+          style.display = 'inline-block';
+          style.width = props.size + 'px';
+          style.height = props.size + 'px';
+        }
+        var nativeEmoji = emojiData.unified ? (0, _utils.unifiedToNative)(emojiData.unified) : '';
+        child = h('span', { attrs: { title: props.title }, style: style }, nativeEmoji);
+      } else if (hasEmoji) {
+        var fallbackEmojiStyles = null;
+        if (isCustom) {
+          fallbackEmojiStyles = customEmojiStyles;
+        } else if (hasEmoji) {
+          fallbackEmojiStyles = {
+            display: 'inline-block',
+            width: props.size + 'px',
+            height: props.size + 'px',
+            backgroundImage: 'url(' + props.backgroundImageFn(props.set, props.sheetSize) + ')',
+            backgroundSize: 100 * SHEET_COLUMNS + '%',
+            backgroundPosition: (0, _utils.getBgPosition)(emojiData, SHEET_COLUMNS)
+          };
+        }
+        child = h('span', { attrs: { title: props.title }, style: fallbackEmojiStyles });
+      } else {
+        var fallbackEmoji = props.fallback ? props.fallback(props.emoji) : null;
+        child = h('span', fallbackEmoji);
+      }
 
-      return x + '% ' + y + '%';
-    },
-    onClick: function onClick() {
-      this.$emit('click', this.sanitizedData);
-    },
-    onMouseEnter: function onMouseEnter() {
-      this.$emit('mouseenter', this.sanitizedData);
-    },
-    onMouseLeave: function onMouseLeave() {
-      this.$emit('mouseleave', this.sanitizedData);
+      var self = this;
+      var sanitizedData = (0, _utils.getSanitizedData)(props.emoji, props.skin, props.set, mutableData);
+      return h('span', (0, _extends3.default)({}, data, { class: 'emoji-mart-emoji', props: props, on: {
+          click: function click(event) {
+            if (!listeners.click) {
+              return;
+            }
+            var emit = listeners.click;
+            emit(sanitizedData);
+          },
+          mouseleave: function mouseleave(event) {
+            if (!listeners.mouseleave) {
+              return;
+            }
+            var emit = listeners.mouseleave;
+            emit(sanitizedData);
+          },
+          mouseenter: function mouseenter(event) {
+            if (!listeners.mouseenter) {
+              return;
+            }
+            var emit = listeners.mouseenter;
+            emit(sanitizedData);
+          }
+        }
+      }), [child]);
     }
+    return h('span');
   }
 };
 
@@ -2941,6 +2939,10 @@ exports.default = {
     skinProps: {
       type: Object,
       required: true
+    },
+    showPreviewName: {
+      type: Boolean,
+      default: true
     }
   },
   computed: {
@@ -3561,6 +3563,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 //
 //
 //
+//
 
 
 var RECENT_CATEGORY = { id: 'recent', name: 'Recent', emojis: null };
@@ -3737,6 +3740,12 @@ exports.default = {
   },
 
   methods: {
+    reset: function reset() {
+      if (this.$refs && this.$refs.search) {
+        this.$refs.search.clear();
+      }
+      this.activeCategory = this.filteredCategories[0];
+    },
     onScroll: function onScroll() {
       if (this.infiniteScroll && !this.waitingForPaint) {
         this.waitingForPaint = true;
@@ -12583,9 +12592,9 @@ var render = function() {
             ? _c("div", {
                 domProps: { innerHTML: _vm._s(_vm.customSVGs[category.id]) }
               })
-            : _vm._e(),
-          _vm._v(" "),
-          _c("div", { domProps: { innerHTML: _vm._s(_vm.svgs[category.id]) } }),
+            : _c("div", {
+                domProps: { innerHTML: _vm._s(_vm.svgs[category.id]) }
+              }),
           _vm._v(" "),
           _c("span", {
             staticClass: "emoji-mart-anchor-bar",
@@ -12688,46 +12697,8 @@ exports.push([module.i, "\n.emoji-mart-category .emoji-mart-emoji span {\n  z-in
 
 
 /***/ }),
-/* 94 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// style-loader: Adds some css to the DOM by adding a <style> tag
-
-// load the styles
-var content = __webpack_require__(95);
-if(typeof content === 'string') content = [[module.i, content, '']];
-if(content.locals) module.exports = content.locals;
-// add the styles to the DOM
-var update = __webpack_require__(1)("5e1c2d21", content, false, {});
-// Hot Module Replacement
-if(false) {
- // When the styles change, update the <style> tags
- if(!content.locals) {
-   module.hot.accept("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-7f853594\",\"scoped\":true,\"hasInlineConfig\":false}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./nimbleEmoji.vue", function() {
-     var newContent = require("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-7f853594\",\"scoped\":true,\"hasInlineConfig\":false}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./nimbleEmoji.vue");
-     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-     update(newContent);
-   });
- }
- // When the module is disposed, remove the <style> tags
- module.hot.dispose(function() { update(); });
-}
-
-/***/ }),
-/* 95 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(0)(false);
-// imports
-
-
-// module
-exports.push([module.i, "\n.emoji-mart-emoji[data-v-7f853594] {\n  position: relative;\n  display: inline-block;\n  font-size: 0;\n}\n\n", ""]);
-
-// exports
-
-
-/***/ }),
+/* 94 */,
+/* 95 */,
 /* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -13539,59 +13510,7 @@ exports.default = _String.fromCodePoint || function stringFromCodePoint() {
 };
 
 /***/ }),
-/* 129 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-var render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _vm.canRender
-    ? _c(
-        "span",
-        {
-          staticClass: "emoji-mart-emoji",
-          on: {
-            mouseenter: _vm.onMouseEnter,
-            mouseleave: _vm.onMouseLeave,
-            click: _vm.onClick
-          }
-        },
-        [
-          _vm.isCustom
-            ? _c("span", {
-                style: _vm.customEmojiStyles,
-                attrs: { title: _vm.title }
-              })
-            : _vm.isNative
-              ? _c(
-                  "span",
-                  { style: _vm.nativeEmojiStyles, attrs: { title: _vm.title } },
-                  [_vm._v(_vm._s(_vm.nativeEmoji))]
-                )
-              : _vm.hasEmoji
-                ? _c("span", {
-                    style: _vm.fallbackEmojiStyles,
-                    attrs: { title: _vm.title }
-                  })
-                : _c("span", [_vm._v(_vm._s(_vm.fallbackEmoji))])
-        ]
-      )
-    : _vm._e()
-}
-var staticRenderFns = []
-render._withStripped = true
-var esExports = { render: render, staticRenderFns: staticRenderFns }
-/* harmony default export */ __webpack_exports__["a"] = (esExports);
-if (false) {
-  module.hot.accept()
-  if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-7f853594", esExports)
-  }
-}
-
-/***/ }),
+/* 129 */,
 /* 130 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -13846,9 +13765,11 @@ var render = function() {
             ),
             _vm._v(" "),
             _c("div", { staticClass: "emoji-mart-preview-data" }, [
-              _c("div", { staticClass: "emoji-mart-preview-name" }, [
-                _vm._v(_vm._s(_vm.emoji.name))
-              ]),
+              _vm.showPreviewName
+                ? _c("div", { staticClass: "emoji-mart-preview-name" }, [
+                    _vm._v(_vm._s(_vm.emoji.name))
+                  ])
+                : _vm._e(),
               _vm._v(" "),
               _c(
                 "div",
@@ -14636,7 +14557,8 @@ var render = function() {
                   "idle-emoji": _vm.emoji,
                   "show-skin-tones": _vm.showSkinTones,
                   "emoji-props": _vm.emojiProps,
-                  "skin-props": _vm.skinProps
+                  "skin-props": _vm.skinProps,
+                  showPreviewName: _vm.showPreviewName
                 },
                 on: { change: _vm.onSkinChange }
               })
@@ -14795,6 +14717,47 @@ if (false) {
     require("vue-hot-reload-api")      .rerender("data-v-4fbc735b", esExports)
   }
 }
+
+/***/ }),
+/* 164 */,
+/* 165 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(166);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(1)("a5b0a058", content, false, {});
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-7f853594\",\"scoped\":false,\"hasInlineConfig\":false}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./nimbleEmoji.vue", function() {
+     var newContent = require("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-7f853594\",\"scoped\":false,\"hasInlineConfig\":false}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./nimbleEmoji.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 166 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(0)(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n.emoji-mart-emoji {\n  position: relative;\n  display: inline-block;\n  font-size: 0;\n}\n\n", ""]);
+
+// exports
+
 
 /***/ })
 /******/ ]);
