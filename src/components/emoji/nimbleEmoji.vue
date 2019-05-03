@@ -1,17 +1,6 @@
-<template>
-
-<span v-if="canRender" class="emoji-mart-emoji" @mouseenter="onMouseEnter" @mouseleave="onMouseLeave" @click="onClick">
-  <span v-if="isCustom" :title="title" :style="customEmojiStyles"></span>
-  <span v-else-if="isNative" :title="title" :style="nativeEmojiStyles">{{ nativeEmoji }}</span>
-  <span v-else-if="hasEmoji" :title="title" :style="fallbackEmojiStyles"></span>
-  <span v-else>{{ fallbackEmoji }}</span>
-</span>
-
-</template>
-
 <script>
 
-import { getData, getSanitizedData, unifiedToNative } from '../../utils'
+import { getData, getSanitizedData, unifiedToNative, getBgPosition } from '../../utils'
 import { uncompress } from '../../utils/data'
 import { EmojiProps } from '../../utils/shared-props'
 
@@ -25,6 +14,95 @@ export default {
       required: true
     }
   },
+  functional: true,
+  render(h, ctx) {
+    let { data, props, listeners } = ctx
+
+    let emojiData = {}
+    const mutableData = props.data.compressed ? uncompress(props.data) : props.data
+    if (props.emoji) {
+      emojiData = getData(props.emoji, props.skin, props.set, mutableData)
+    }
+    const hasEmoji = emojiData['has_img_' + props.set]
+    const isNative = props.native
+    const isCustom = emojiData.custom
+
+    if (isCustom || isNative || hasEmoji || props.fallback) {
+      const customEmojiStyles = {
+        display: 'inline-block',
+        width: props.size + 'px',
+        height: props.size + 'px',
+        backgroundImage: 'url(' + emojiData.imageUrl + ')',
+        backgroundSize: '100%',
+      }
+      let child = null;
+      if (isCustom) {
+        child = h('span', { attrs: {title: props.title}, style: {
+          display: 'inline-block',
+          width: props.size + 'px',
+          height: props.size + 'px',
+          backgroundImage: 'url(' + emojiData.imageUrl + ')',
+          backgroundSize: '100%',
+        } })
+      } else if (isNative) {
+        let style = { fontSize: props.size + 'px' }
+        if (props.forceSize) {
+          style.display = 'inline-block'
+          style.width = props.size + 'px'
+          style.height = props.size + 'px'
+        }
+        const nativeEmoji = emojiData.unified ? unifiedToNative(emojiData.unified) : ''
+        child = h('span' , { attrs: {title: props.title}, style }, nativeEmoji)
+      } else if (hasEmoji) {
+        let fallbackEmojiStyles = null
+        if (isCustom) {
+          fallbackEmojiStyles = customEmojiStyles
+        } else if (hasEmoji) {
+          fallbackEmojiStyles = {
+            display: 'inline-block',
+            width: props.size + 'px',
+            height: props.size + 'px',
+            backgroundImage: 'url(' + props.backgroundImageFn(props.set, props.sheetSize) + ')',
+            backgroundSize: (100 * SHEET_COLUMNS) + '%',
+            backgroundPosition: getBgPosition(emojiData, SHEET_COLUMNS)
+          }
+        }
+        child = h('span', { attrs: {title: props.title}, style: fallbackEmojiStyles })
+      } else {
+        const fallbackEmoji = props.fallback ? props.fallback(props.emoji) : null
+        child = h('span', fallbackEmoji)
+      }
+
+      const self = this;
+      const sanitizedData = getSanitizedData(props.emoji, props.skin, props.set, mutableData)
+      return h('span', { ...data, class: 'emoji-mart-emoji', props, on: {
+          click: event => {
+            if (!listeners.click) {
+              return;
+            }
+            const emit = listeners.click
+            emit(sanitizedData)
+          },
+          mouseleave: event => {
+            if (!listeners.mouseleave) {
+              return;
+            }
+            const emit = listeners.mouseleave
+            emit(sanitizedData)
+          },
+          mouseenter: event => {
+            if (!listeners.mouseenter) {
+              return;
+            }
+            const emit = listeners.mouseenter
+            emit(sanitizedData)
+          },
+        }
+      }, [child])
+    }
+    return h('span');
+  },
+/*
   data() {
     return {
       mutableData: this.data.compressed ? uncompress(this.data) : this.data,
@@ -81,9 +159,9 @@ export default {
           display: 'inline-block',
           width: this.size + 'px',
           height: this.size + 'px',
-          backgroundImage: 'url(' + this.backgroundImageFn(this.set, this.sheetSize) + ')',
+          backgroundImage: 'url(' + props.backgroundImageFn(this.set, this.sheetSize) + ')',
           backgroundSize: (100 * SHEET_COLUMNS) + '%',
-          backgroundPosition: this.getPosition()
+          backgroundPosition: getBgPosition(emojiData, SHEET_COLUMNS)
         }
       } else {
         return null
@@ -120,11 +198,12 @@ export default {
       this.$emit('mouseleave', this.sanitizedData)
     }
   }
+*/
 }
 
 </script>
 
-<style scoped>
+<style>
 
 .emoji-mart-emoji {
   position: relative;
