@@ -222,6 +222,9 @@ export default {
       if (this.$refs && this.$refs.search) {
         this.$refs.search.clear()
       }
+      if (this.$refs && this.$refs.scroll) {
+        this.$refs.scroll.scrollTop = 0
+      }
       this.activeCategory = this.filteredCategories[0]
     },
     onScroll() {
