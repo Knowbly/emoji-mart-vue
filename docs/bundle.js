@@ -3758,6 +3758,9 @@ exports.default = {
     onScrollPaint: function onScrollPaint() {
       this.waitingForPaint = false;
 
+      if (this.searchEmojis !== null) {
+        return;
+      }
       var scrollTop = this.$refs.scroll.scrollTop,
           activeCategory = this.filteredCategories[0];
 
